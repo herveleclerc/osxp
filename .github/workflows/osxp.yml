@@ -1,0 +1,35 @@
+name: osxp
+
+on:
+  push:
+    # Trigger this workflow only on commits pushed to the main branch
+    branches:
+      - main
+
+jobs:
+  dagger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      # Pour la demo on fait les 3 étapes
+      # On aurait pu faire juste un  `do deploy`
+
+      - name: Build and Deploy to Azure 
+        uses: dagger/dagger-for-github@v3
+        with:
+          #version: 0.2
+          cmds: |
+            project update
+            project update github.com/herveleclerc/apptpl@v0.1.3
+            project update -u
+            do build
+            do push
+            do deploy
+        env:
+          GITHUB_USER: ${{ secrets.AWGITHUB_USER }}
+          GITHUB_TOKEN: ${{ secrets.AWGITHUB_TOKEN }}
+          KUBECONFIG: "$HOME/.kube/config"
+          KUBECONFIGFILE: ${{ secrets.KUBECONFIGFILE }}
+          DAGGER_LOG_LEVEL: "error"
